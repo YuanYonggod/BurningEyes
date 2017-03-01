@@ -1,5 +1,7 @@
 #include "irisrecognition.h"
 
+#include <iostream>
+
 IrisRecognition::IrisRecognition()
 {
 
@@ -7,7 +9,12 @@ IrisRecognition::IrisRecognition()
 
 IrisRecognition::~IrisRecognition()
 {
-
+    irisCode.clear();
+}
+void IrisRecognition::init()
+{
+    if(!irisCode.empty())
+        irisCode.clear();
 }
 
 void IrisRecognition::segmentIris(cv::Mat &src, cv::Mat &dst)
@@ -31,4 +38,30 @@ void IrisRecognition::gaborFilterIris(cv::Mat &src, cv::Mat &dst)
     gaborFilter.gaborCode(src,dst);
     irisCode = gaborFilter.getIrisCode();
     gaborFilter.clearIrisCode();
+}
+
+void IrisRecognition::writeIrisCode()
+{
+    int pos = path.find_last_of('/');
+    string file(path.substr(pos+1));
+    string temp(path.substr(0,pos));
+    int inx = temp.find_last_of('/');
+    string dir(temp.substr(inx+1));
+    cout<<dir<<" "<<file<<endl;
+    match.writeCode(dir,file,irisCode);
+}
+
+void IrisRecognition::matchIrisCode()
+{
+    match.matchCode(irisCode);
+}
+
+void IrisRecognition::loadIrisCode()
+{
+    match.loadCodes(codepath);
+}
+
+void IrisRecognition::clearLoadCode()
+{
+    match.clearMemorry();
 }

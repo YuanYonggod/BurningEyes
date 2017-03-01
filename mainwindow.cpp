@@ -4,6 +4,7 @@
 #include <QString>
 #include <QFileDialog>
 #include <QImage>
+#include <QDebug>
 
 #include <windows.h>
 
@@ -18,11 +19,16 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->pushButton_3->setEnabled(false);
     ui->pushButton_4->setEnabled(false);
     ui->pushButton_5->setEnabled(false);
+    ui->pushButton_6->setEnabled(false);
+    ui->pushButton_7->setEnabled(false);
     connect(ui->pushButton,&QPushButton::clicked,this,&MainWindow::select_clicked);
     connect(ui->pushButton_2,&QPushButton::clicked,this,&MainWindow::segment_clicked);
     connect(ui->pushButton_3,&QPushButton::clicked,this,&MainWindow::normlize_clicked);
     connect(ui->pushButton_4,&QPushButton::clicked,this,&MainWindow::gabor_clickd);
     connect(ui->pushButton_5,&QPushButton::clicked,this,&MainWindow::start);
+    connect(ui->pushButton_6,&QPushButton::clicked,this,&MainWindow::saveCode_clicked);
+    connect(ui->pushButton_7,&QPushButton::clicked,this,&MainWindow::match_clicked);
+    connect(ui->pushButton_8,&QPushButton::clicked,this,&MainWindow::load_clicked);
 }
 
 MainWindow::~MainWindow()
@@ -33,6 +39,7 @@ MainWindow::~MainWindow()
 //槽函数，打开图片
 void MainWindow::select_clicked()
 {
+    clearAll();
     iris.srcMat = selectImage();
     showImageInLabel(iris.srcMat,ui->label);
     ui->pushButton_2->setEnabled(true);
@@ -66,6 +73,8 @@ void MainWindow::gabor_clickd()
     ui->pushButton_4->setEnabled(false);
     iris.gaborFilterIris(iris.normMat,iris.codeMat);
     showImageInLabel(iris.codeMat,ui->label_4,QImage::Format_Grayscale8,QSize(128,32));
+    ui->pushButton_6->setEnabled(true);
+    ui->pushButton_7->setEnabled(true);
 }
 
 //槽函数，批处理
@@ -85,9 +94,30 @@ void MainWindow::start()
     iris.gaborFilterIris(iris.normMat,iris.codeMat);
     showImageInLabel(iris.codeMat,ui->label_4,QImage::Format_Grayscale8,QSize(128,32));
     Sleep(10);
+    ui->pushButton_6->setEnabled(true);
+    ui->pushButton_7->setEnabled(true);
 }
 
+//槽函数，写入虹膜码
+void MainWindow::saveCode_clicked()
+{
+    ui->pushButton_6->setEnabled(false);
+    iris.writeIrisCode();
+}
+//槽函数，加载虹膜码
+void MainWindow::load_clicked()
+{
+    iris.clearLoadCode();
+    QString fileName = QFileDialog::getOpenFileName(this,tr("load iris databets!"),".",tr("Image Files(*.iris)"));
+    iris.codepath = fileName.toStdString();
+    iris.loadIrisCode();
+}
 
+//槽函数，匹配虹膜码
+void MainWindow::match_clicked()
+{
+    iris.matchIrisCode();
+}
 
 void MainWindow::showImageInLabel(cv::Mat &image,QLabel *label,QImage::Format format,QSize showSize)
 {
@@ -101,6 +131,7 @@ void MainWindow::showImageInLabel(cv::Mat &image,QLabel *label,QImage::Format fo
 cv::Mat MainWindow::selectImage()
 {
     QString fileName = QFileDialog::getOpenFileName(this,tr("open image!"),".",tr("Image Files(*.png *.jpg *bmp)"));
+    iris.path = fileName.toStdString();
     cv::Mat srcMat = cv::imread(fileName.toLatin1().data());
     if(srcMat.channels() == 3)
     {
@@ -113,4 +144,13 @@ cv::Mat MainWindow::selectImage()
         //qDebug()<<"1 channel image"<<endl;
         return srcMat;
     }
+}
+
+void MainWindow::clearAll()
+{
+    ui->label->setText("image");
+    ui->label_2->setText("image");
+    ui->label_3->setText("image");
+    ui->label_4->setText("image");
+    iris.init();
 }

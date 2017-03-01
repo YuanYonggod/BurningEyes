@@ -73,7 +73,7 @@ cv::Mat Gaborfilter::getImagKernel()
 
 }
 
-std::vector<int> Gaborfilter::getIrisCode()
+std::vector<char> Gaborfilter::getIrisCode()
 {
     return irisCode;
 }
@@ -103,39 +103,90 @@ void Gaborfilter::gaborCode(cv::Mat &src, cv::Mat &dst)
 {
     int nr = src.rows;
     int theta = src.cols;
-    for(int i = 0;i < 1024;i++)
+    //提取局部特征
+    cv::Mat subMat1(src,cv::Rect(0,0,theta*1/6,nr*1/2));
+    cv::imwrite("sub1.jpg",subMat1);
+    cv::Mat subMat2(src,cv::Rect(theta*1/6,0,theta*1/6,nr*1/2));
+    cv::imwrite("sub2.jpg",subMat2);
+    cv::Mat subMat3(src,cv::Rect(theta*2/6,0,theta*1/6,nr*1/2));
+    cv::imwrite("sub3.jpg",subMat3);
+    cv::Mat subMat4(src,cv::Rect(theta*3/6,0,theta*1/6,nr*1/2));
+    cv::imwrite("sub4.jpg",subMat4);
+    cv::Mat subMat5(src,cv::Rect(theta*4/6,0,theta*1/6,nr*1/2));
+    cv::imwrite("sub5.jpg",subMat5);
+    cv::Mat subMat6(src,cv::Rect(theta*5/6,0,theta*1/6,nr*1/2));
+    cv::imwrite("sub6.jpg",subMat6);
+    cv::Mat subMat7(src,cv::Rect(0,nr*1/2,theta*1/6,nr*1/2));
+    cv::imwrite("sub7.jpg",subMat7);
+    cv::Mat subMat8(src,cv::Rect(theta*1/6,nr*1/2,theta*1/6,nr*1/2));
+    cv::imwrite("sub8.jpg",subMat8);
+    cv::Mat subMat9(src,cv::Rect(theta*2/6,nr*1/2,theta*1/6,nr*1/2));
+    cv::imwrite("sub9.jpg",subMat9);
+    cv::Mat subMat10(src,cv::Rect(theta*3/6,nr*1/2,theta*1/6,nr*1/2));
+    cv::imwrite("sub10.jpg",subMat10);
+    cv::Mat subMat11(src,cv::Rect(theta*4/6,nr*1/2,theta*1/6,nr*1/2));
+    cv::imwrite("sub11.jpg",subMat11);
+    cv::Mat subMat12(src,cv::Rect(theta*5/6,nr*1/2,theta*1/6,nr*1/2));
+    cv::imwrite("sub12.jpg",subMat12);
+
+    for(int i = 0;i < 100;i++)
     {
-        if(create_kernel(nr,theta,80,360,1.0+0.1*i,CV_64F))
+        if(create_kernel(40,60,40,60,10+i,CV_64F))
         {
             cv::Mat realK = getRealKernel();
             cv::Mat imagK = getImagKernel();
-            double real = filterGabor(src,realK);
-            double imag = filterGabor(src,imagK);
-        //        for(int i = 0;i < realK.rows;i++)
-        //        {
-        //            double *data = realK.ptr<double>(i);
-        //            for(int j = 0;j < realK.cols;j++)
-        //                std::cout<<std::setw(10)<<data[j];
-        //            std::cout<<endl;
-        //        }
-            //qDebug()<<"realSum:"<<real<<",imaginarySum:"<<imag<<endl;
-            if(real >= 0)
-                irisCode.push_back(1);
-            else
-                irisCode.push_back(0);
-            if(imag >= 0)
-                irisCode.push_back(1);
-            else
-                irisCode.push_back(0);
+            for(int j = 1;j < 13;j++)
+            {
+                cv::Mat subMat;
+                switch(j)
+                {
+                case 1:subMat = subMat1;
+                    break;
+                case 2:subMat = subMat2;
+                    break;
+                case 3:subMat = subMat3;
+                    break;
+                case 4:subMat = subMat4;
+                    break;
+                case 5:subMat = subMat5;
+                    break;
+                case 6:subMat = subMat6;
+                    break;
+                case 7:subMat = subMat7;
+                    break;
+                case 8:subMat = subMat8;
+                    break;
+                case 9:subMat = subMat9;
+                    break;
+                case 10:subMat = subMat10;
+                    break;
+                case 11:subMat = subMat11;
+                    break;
+                case 12:subMat = subMat12;
+                    break;
+                default:break;
+                }
+                double real = filterGabor(subMat,realK);
+                double imag = filterGabor(subMat,imagK);
+
+                if(real >= 0)
+                    irisCode.push_back('1');
+                else
+                    irisCode.push_back('0');
+                if(imag >= 0)
+                    irisCode.push_back('1');
+                else
+                    irisCode.push_back('0');
+            }
 
             //qDebug()<<"irisCode size:"<<irisCode.size();
-            dst = cv::Mat(32,128,CV_8U,cv::Scalar(127));
+            dst = cv::Mat(30,160,CV_8U,cv::Scalar(127));
             int i = 0;
-            for(int u = 0;u < 32;u++)
+            for(int u = 0;u < 30;u++)
             {
-                for(int v = 0;v < 128;)
+                for(int v = 0;v < 160;)
                 {
-                    uchar data = (irisCode[i] == 0) ? 1 : 255;
+                    uchar data = (irisCode[i] == '0') ? 1 : 255;
                     dst.at<uchar>(u,v) = data;
                     dst.at<uchar>(u,v+1) = data;
                     //std::cout<<irisCode[i]<<" ";

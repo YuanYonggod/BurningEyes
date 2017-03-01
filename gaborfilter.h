@@ -14,14 +14,14 @@ public:
     bool create_kernel(int r,int theta,int alpha,int beta,double omiga,int ktype);
     cv::Mat getRealKernel();
     cv::Mat getImagKernel();
-    std::vector<int> getIrisCode();
+    std::vector<char> getIrisCode();
     void clearIrisCode();
     double filterGabor(cv::Mat &src,cv::Mat &kernel);
     void gaborCode(cv::Mat &src,cv::Mat &dst);
 
 private:
     cv::Mat realKernel,imagKernel;
-    std::vector<int> irisCode;
+    std::vector<char> irisCode;
     bool isCreatedKernel = false;
 };
 

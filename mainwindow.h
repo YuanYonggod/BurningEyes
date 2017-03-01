@@ -25,6 +25,7 @@ public:
     void showImageInLabel(cv::Mat &image,QLabel *label,
                           QImage::Format = QImage::Format_RGB888,QSize showSize = QSize(160,120));
     cv::Mat selectImage();
+    void clearAll();
 
 public slots:
     void select_clicked();
@@ -32,6 +33,9 @@ public slots:
     void normlize_clicked();
     void gabor_clickd();
     void start();
+    void saveCode_clicked();
+    void load_clicked();
+    void match_clicked();
 
 private:
     Ui::MainWindow *ui;
