@@ -27,6 +27,9 @@ public:
     void matchIrisCode();
     void clearLoadCode();
 
+    void writeIrisCodeAll(string dir,string file);
+    bool showBatchResult(string path,string target);
+
     cv::Mat srcMat,grayMat,gaussMat,segMat,normMat,codeMat;
     std::vector<char> irisCode;
     Segment segment;

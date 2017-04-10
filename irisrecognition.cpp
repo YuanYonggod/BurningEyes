@@ -47,8 +47,12 @@ void IrisRecognition::writeIrisCode()
     string temp(path.substr(0,pos));
     int inx = temp.find_last_of('/');
     string dir(temp.substr(inx+1));
-    cout<<dir<<" "<<file<<endl;
     match.writeCode(dir,file,irisCode);
+}
+
+void IrisRecognition::writeIrisCodeAll(string dir, string file)
+{
+    match.writeCodeAll(dir,file,irisCode);
 }
 
 void IrisRecognition::matchIrisCode()
@@ -64,4 +68,9 @@ void IrisRecognition::loadIrisCode()
 void IrisRecognition::clearLoadCode()
 {
     match.clearMemorry();
+}
+
+bool IrisRecognition::showBatchResult(string path,string target)
+{
+    return match.batchMatch(path,target,irisCode);
 }

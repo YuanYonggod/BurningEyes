@@ -74,8 +74,8 @@ void Segment::findPupilEdge(cv::Mat &src, cv::Mat &dst)
     pthread_attr_setdetachstate(&pttr,PTHREAD_CREATE_JOINABLE);
     for(int i = 0;i < THREADS_NUM;i++)
     {
-        attr[i].i0 = 200;attr[i].i1 = height-200;
-        attr[i].j0 = 250;attr[i].j1 = width-250;
+        attr[i].i0 = 150;attr[i].i1 = height-150;
+        attr[i].j0 = 200;attr[i].j1 = width-200;
         attr[i].r0 = 20+i*10;attr[i].r1 = 30+i*10;
         attr[i].seg.gaussMat = src;
         int ret = pthread_create(&tid[i],&pttr,calMaxEdge,(void*)&attr[i]);

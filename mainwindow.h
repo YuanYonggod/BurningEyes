@@ -7,6 +7,10 @@
 
 #include <QMainWindow>
 #include <QLabel>
+#include <QDir>
+#include <QFileInfoList>
+#include <QFileInfo>
+#include <vector>
 
 #include <irisrecognition.h>
 
@@ -25,6 +29,9 @@ public:
     void showImageInLabel(cv::Mat &image,QLabel *label,
                           QImage::Format = QImage::Format_RGB888,QSize showSize = QSize(160,120));
     cv::Mat selectImage();
+    void readDir();
+    void clearDir();
+    QFileInfoList getAllFiles(QString path);
     void clearAll();
 
 public slots:
@@ -36,10 +43,16 @@ public slots:
     void saveCode_clicked();
     void load_clicked();
     void match_clicked();
+    void batch_clicked();
+    void batchMatch_clicked();
 
 private:
     Ui::MainWindow *ui;
     IrisRecognition iris;
+    QFileInfoList filelist;
+    std::vector<string> dirName;
+    std::vector<string> segDirName;
+    std::vector<string> normDirName;
 };
 
 #endif // MAINWINDOW_H

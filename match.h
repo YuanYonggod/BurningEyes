@@ -21,13 +21,15 @@ public:
     vector<vector<char> > irisCodes;
 
     string message;
-    double matchValue = 1.0;
     vector<double> matchValues;
 
     void writeCode(string dir,string file,vector<char> code);
+    void writeCodeAll(string dir,string file,vector<char> code);
     string matchCode(vector<char> code);
     void loadCodes(string codePath);
     void clearMemorry();
+
+    bool batchMatch(string path,string target,vector<char> sampleCode);
 };
 
 #endif // MATCH_H
