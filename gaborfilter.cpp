@@ -1,5 +1,7 @@
 #include "gaborfilter.h"
 #include <QDebug>
+#include <fstream>
+#include <iostream>
 
 Gaborfilter::Gaborfilter()
 {
@@ -105,33 +107,35 @@ void Gaborfilter::gaborCode(cv::Mat &src, cv::Mat &dst)
     int theta = src.cols;
     //提取局部特征
     cv::Mat subMat1(src,cv::Rect(0,0,theta*1/6,nr*1/2));
-    cv::imwrite("sub1.jpg",subMat1);
+    //cv::imwrite("sub1.jpg",subMat1);
     cv::Mat subMat2(src,cv::Rect(theta*1/6,0,theta*1/6,nr*1/2));
-    cv::imwrite("sub2.jpg",subMat2);
+    //cv::imwrite("sub2.jpg",subMat2);
     cv::Mat subMat3(src,cv::Rect(theta*2/6,0,theta*1/6,nr*1/2));
-    cv::imwrite("sub3.jpg",subMat3);
+    //cv::imwrite("sub3.jpg",subMat3);
     cv::Mat subMat4(src,cv::Rect(theta*3/6,0,theta*1/6,nr*1/2));
-    cv::imwrite("sub4.jpg",subMat4);
+    //cv::imwrite("sub4.jpg",subMat4);
     cv::Mat subMat5(src,cv::Rect(theta*4/6,0,theta*1/6,nr*1/2));
-    cv::imwrite("sub5.jpg",subMat5);
+    //cv::imwrite("sub5.jpg",subMat5);
     cv::Mat subMat6(src,cv::Rect(theta*5/6,0,theta*1/6,nr*1/2));
-    cv::imwrite("sub6.jpg",subMat6);
+    //cv::imwrite("sub6.jpg",subMat6);
     cv::Mat subMat7(src,cv::Rect(0,nr*1/2,theta*1/6,nr*1/2));
-    cv::imwrite("sub7.jpg",subMat7);
+    //cv::imwrite("sub7.jpg",subMat7);
     cv::Mat subMat8(src,cv::Rect(theta*1/6,nr*1/2,theta*1/6,nr*1/2));
-    cv::imwrite("sub8.jpg",subMat8);
+    //cv::imwrite("sub8.jpg",subMat8);
     cv::Mat subMat9(src,cv::Rect(theta*2/6,nr*1/2,theta*1/6,nr*1/2));
-    cv::imwrite("sub9.jpg",subMat9);
+    //cv::imwrite("sub9.jpg",subMat9);
     cv::Mat subMat10(src,cv::Rect(theta*3/6,nr*1/2,theta*1/6,nr*1/2));
-    cv::imwrite("sub10.jpg",subMat10);
+    //cv::imwrite("sub10.jpg",subMat10);
     cv::Mat subMat11(src,cv::Rect(theta*4/6,nr*1/2,theta*1/6,nr*1/2));
-    cv::imwrite("sub11.jpg",subMat11);
+    //cv::imwrite("sub11.jpg",subMat11);
     cv::Mat subMat12(src,cv::Rect(theta*5/6,nr*1/2,theta*1/6,nr*1/2));
-    cv::imwrite("sub12.jpg",subMat12);
+    //cv::imwrite("sub12.jpg",subMat12);
 
+    std::ofstream out("suitable_w.txt");
     for(int i = 0;i < 100;i++)
     {
-        if(create_kernel(40,60,40,60,10+i,CV_64F))
+        double maxw = 0;
+        if(create_kernel(40,60,40,60,0.1+0.1*i,CV_64F))
         {
             cv::Mat realK = getRealKernel();
             cv::Mat imagK = getImagKernel();
@@ -170,32 +174,73 @@ void Gaborfilter::gaborCode(cv::Mat &src, cv::Mat &dst)
                 double imag = filterGabor(subMat,imagK);
 
                 if(real >= 0)
-                    irisCode.push_back('1');
+                {irisCode.push_back('1');maxw += real;}
                 else
-                    irisCode.push_back('0');
+                {irisCode.push_back('0');maxw += -real;}
                 if(imag >= 0)
-                    irisCode.push_back('1');
+                {irisCode.push_back('1');maxw += imag;}
                 else
-                    irisCode.push_back('0');
+                {irisCode.push_back('0');maxw += -imag;}
             }
-
-            //qDebug()<<"irisCode size:"<<irisCode.size();
-            dst = cv::Mat(30,160,CV_8U,cv::Scalar(127));
-            int i = 0;
-            for(int u = 0;u < 30;u++)
-            {
-                for(int v = 0;v < 160;)
-                {
-                    uchar data = (irisCode[i] == '0') ? 1 : 255;
-                    dst.at<uchar>(u,v) = data;
-                    dst.at<uchar>(u,v+1) = data;
-                    //std::cout<<irisCode[i]<<" ";
-                    i++;
-                    v += 2;
-                }
-                //std::cout<<std::endl<<std::flush;
-            }
-            cv::imwrite("code.jpg",dst);
        }
+       //suitw.push_back(maxw);
+       suitmap.insert({maxw,0.1+0.1*i});
+
+       if(out.is_open())
+       {
+           out << "w:" << 0.1+0.1*i << " maxw:" << maxw << "\n";
+       }
+    }
+    //quicksort(suitw,0,suitw.size()-1);
+    out << "first 100:" << "\n";
+    auto end = suitmap.cend();
+    for(int i = 0;i < 100;i++)
+    {
+        end--;
+        out << "maxw:" << end->first << "   w:" << end->second << "\n";
+
+    }
+
+    out.close();
+    //qDebug()<<"irisCode size:"<<irisCode.size();
+    dst = cv::Mat(30,160,CV_8U,cv::Scalar(127));
+    int i = 0;
+    for(int u = 0;u < 30;u++)
+    {
+        for(int v = 0;v < 160;)
+        {
+            uchar data = (irisCode[i] == '0') ? 1 : 255;
+            dst.at<uchar>(u,v) = data;
+            dst.at<uchar>(u,v+1) = data;
+            //std::cout<<irisCode[i]<<" ";
+            i++;
+            v += 2;
+        }
+        //std::cout<<std::endl<<std::flush;
+    }
+}
+
+//降序快排
+void Gaborfilter::quicksort(std::vector<double> a, int left, int right)
+{
+    if(left < right)
+    {
+        int i = left;
+        int j = right;
+        double x = a[i];
+        while(i < j)
+        {
+            while(i < j && a[j] < x)
+                j--;
+            if(i < j)
+                a[i++] = a[j];
+            while(i < j && a[i] > x)
+                i++;
+            if(i < j)
+                a[j--] = a[i];
+        }
+        a[i] = x;
+        quicksort(a,left,i-1);
+        quicksort(a,i+1,right);
     }
 }
