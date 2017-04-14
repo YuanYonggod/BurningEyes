@@ -39,7 +39,7 @@ void Match::writeCode(string dir, string file, std::vector<char> code)
 
 void Match::writeCodeAll(string dir, string file, vector<char> code)
 {
-    string filename = "template.iris";
+    string filename = "twins.iris";
     ofstream out(filename,ios::app|ios::binary);
     if(out.is_open())
     {
