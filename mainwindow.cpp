@@ -33,12 +33,23 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->pushButton_8,&QPushButton::clicked,this,&MainWindow::load_clicked);
     connect(ui->pushButton_9,&QPushButton::clicked,this,&MainWindow::batch_clicked);
     connect(ui->pushButton_10,&QPushButton::clicked,this,&MainWindow::batchMatch_clicked);
+    connect(ui->pushButton_11,&QPushButton::clicked,this,&MainWindow::preprocess);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+string itos(int i)
+{
+    stringstream ss;
+    string str;
+    ss << i;
+    ss >> str;
+    return str;
+}
+
 
 //槽函数，打开图片
 void MainWindow::select_clicked()
@@ -147,8 +158,8 @@ void MainWindow::batch_clicked()
         string normPath = normDirName[i] + "/" + baseName.toStdString() + ".jpg";
         cv::imwrite(normPath,iris.normMat);
 
-        iris.gaborFilterIris(iris.normMat,iris.codeMat);
-        iris.writeIrisCodeAll(dirName[i],baseName.toStdString() + ".jpg");
+        //iris.gaborFilterIris(iris.normMat,iris.codeMat);
+        //iris.writeIrisCodeAll(dirName[i],baseName.toStdString() + ".jpg");
     }
     clearDir();
 }
@@ -194,6 +205,36 @@ void MainWindow::batchMatch_clicked()
     ofstream out("SamplesResult/MatchResult.txt",ios::app|ios::binary);
     out << "ratio:" << r << '\n';
     out.close();
+}
+
+
+//槽函数，预处理数据
+void MainWindow::preprocess()
+{
+    QString dirstr = QFileDialog::getExistingDirectory();
+    QFileInfoList filelist = getAllFiles(dirstr);
+    QDir *d = new QDir;
+    d->mkdir("preData");
+    delete d;
+    for(int i = 0;i < filelist.size();i++)
+    {
+        QString fileName = filelist.at(i).absoluteFilePath();
+        QString baseName = filelist.at(i).baseName();
+        cv::Mat normlize = cv::imread(fileName.toLatin1().data());
+        for(int j = 0;j < 10;j++)
+        {
+            string target = baseName.toStdString().substr(2,6);
+            cv::Mat subMat(normlize,cv::Rect(j*10,0,80,80));
+            target = "preData/" + target + itos(j);
+            string srcstr = target + ".jpg";
+            cv::imwrite(srcstr,subMat);
+            cv::flip(subMat,subMat,1);
+            string dststr = target + "m.jpg";
+            cv::imwrite(dststr,subMat);
+        }
+
+    }
+
 }
 
 void MainWindow::showImageInLabel(cv::Mat &image,QLabel *label,QImage::Format format,QSize showSize)

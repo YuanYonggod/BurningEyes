@@ -45,6 +45,7 @@ public slots:
     void match_clicked();
     void batch_clicked();
     void batchMatch_clicked();
+    void preprocess();
 
 private:
     Ui::MainWindow *ui;
